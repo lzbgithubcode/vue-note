@@ -17,10 +17,10 @@ const banner =
   ' */'
 
 const weexFactoryPlugin = {
-  intro () {
+  intro() {
     return 'module.exports = function weexFactory (exports, document) {'
   },
-  outro () {
+  outro() {
     return '}'
   }
 }
@@ -125,6 +125,7 @@ const builds = {
     dest: resolve('dist/vue.js'),
     format: 'umd',
     env: 'development',
+    sourceMap: true,
     alias: { he: './entity-decoder' },
     banner
   },
@@ -213,7 +214,7 @@ const builds = {
   }
 }
 
-function genConfig (name) {
+function genConfig(name) {
   const opts = builds[name]
   const config = {
     input: opts.entry,
