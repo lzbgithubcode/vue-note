@@ -8,16 +8,29 @@
   </style>
   <!-- Delete ".min" for console warnings in development -->
   <script src="../../dist/vue.js"></script>
-
-  <script>
-    console.log("实例化之前的引用");
-    const vue = new Vue();
-    console.log("打印vue的实例------", vue);
-  </script>
 </head>
 
 <body>
-  我就是测试一下
+  <div id="app">
+    <h5>我是app</h5>
+    <input type="text" v-model="iText" />
+    <div>输入的值：{{iText}}</div>
+    <div>{{formObject.name}}</div>
+  </div>
+  <script>
+    console.log("实例化之前的引用");
+    const vue = new Vue({
+      el: "#app",
+      data: {
+        iText: "初始值",
+        formObject: {
+          id: 100,
+          name: "火蓝刀锋"
+        }
+      }
+    });
+    console.log("打印vue的实例------", vue);
+  </script>
 </body>
 
 </html>

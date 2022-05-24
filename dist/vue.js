@@ -909,7 +909,7 @@
    */
   var shouldObserve = true;
 
-  function toggleObserving (value) {
+  function toggleObserving(value) {
     shouldObserve = value;
   }
 
@@ -919,11 +919,13 @@
    * object's property keys into getter/setters that
    * collect dependencies and dispatch updates.
    */
-  var Observer = function Observer (value) {
+  var Observer = function Observer(value) {
     this.value = value;
+    // 创建一个dep
     this.dep = new Dep();
     this.vmCount = 0;
     def(value, '__ob__', this);
+    // 是否是数组
     if (Array.isArray(value)) {
       if (hasProto) {
         protoAugment(value, arrayMethods);
@@ -937,9 +939,7 @@
   };
 
   /**
-   * Walk through all properties and convert them into
-   * getter/setters. This method should only be called when
-   * value type is Object.
+   * 遍历所有的key, 增加观察
    */
   Observer.prototype.walk = function walk (obj) {
     var keys = Object.keys(obj);
@@ -963,7 +963,7 @@
    * Augment a target Object or Array by intercepting
    * the prototype chain using __proto__
    */
-  function protoAugment (target, src) {
+  function protoAugment(target, src) {
     /* eslint-disable no-proto */
     target.__proto__ = src;
     /* eslint-enable no-proto */
@@ -974,7 +974,7 @@
    * hidden properties.
    */
   /* istanbul ignore next */
-  function copyAugment (target, src, keys) {
+  function copyAugment(target, src, keys) {
     for (var i = 0, l = keys.length; i < l; i++) {
       var key = keys[i];
       def(target, key, src[key]);
@@ -986,7 +986,7 @@
    * returns the new observer if successfully observed,
    * or the existing observer if the value already has one.
    */
-  function observe (value, asRootData) {
+  function observe(value, asRootData) {
     if (!isObject(value) || value instanceof VNode) {
       return
     }
@@ -1011,7 +1011,7 @@
   /**
    * Define a reactive property on an Object.
    */
-  function defineReactive (
+  function defineReactive(
     obj,
     key,
     val,
@@ -1033,11 +1033,14 @@
     }
 
     var childOb = !shallow && observe(val);
+
+    // 观察obj 的 key 变化， 重写了set/get方法
     Object.defineProperty(obj, key, {
       enumerable: true,
       configurable: true,
-      get: function reactiveGetter () {
+      get: function reactiveGetter() {
         var value = getter ? getter.call(obj) : val;
+
         if (Dep.target) {
           dep.depend();
           if (childOb) {
@@ -1049,7 +1052,7 @@
         }
         return value
       },
-      set: function reactiveSetter (newVal) {
+      set: function reactiveSetter(newVal) {
         var value = getter ? getter.call(obj) : val;
         /* eslint-disable no-self-compare */
         if (newVal === value || (newVal !== newVal && value !== value)) {
@@ -1077,7 +1080,7 @@
    * triggers change notification if the property doesn't
    * already exist.
    */
-  function set (target, key, val) {
+  function set(target, key, val) {
     if (
       (isUndef(target) || isPrimitive(target))
     ) {
@@ -1112,7 +1115,7 @@
   /**
    * Delete a property and trigger change if necessary.
    */
-  function del (target, key) {
+  function del(target, key) {
     if (
       (isUndef(target) || isPrimitive(target))
     ) {
@@ -1144,7 +1147,7 @@
    * Collect dependencies on array elements when the array is touched, since
    * we cannot intercept array element access like property getters.
    */
-  function dependArray (value) {
+  function dependArray(value) {
     for (var e = (void 0), i = 0, l = value.length; i < l; i++) {
       e = value[i];
       e && e.__ob__ && e.__ob__.dep.depend();
@@ -3915,7 +3918,7 @@
     }
   }
 
-  function initLifecycle (vm) {
+  function initLifecycle(vm) {
     var options = vm.$options;
 
     // locate first non-abstract parent
@@ -3941,7 +3944,7 @@
     vm._isBeingDestroyed = false;
   }
 
-  function lifecycleMixin (Vue) {
+  function lifecycleMixin(Vue) {
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
       var prevEl = vm.$el;
@@ -4024,7 +4027,7 @@
     };
   }
 
-  function mountComponent (
+  function mountComponent(
     vm,
     el,
     hydrating
@@ -4080,8 +4083,9 @@
     // we set this to vm._watcher inside the watcher's constructor
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
+    // 创建一个watcher
     new Watcher(vm, updateComponent, noop, {
-      before: function before () {
+      before: function before() {
         if (vm._isMounted && !vm._isDestroyed) {
           callHook(vm, 'beforeUpdate');
         }
@@ -4098,7 +4102,7 @@
     return vm
   }
 
-  function updateChildComponent (
+  function updateChildComponent(
     vm,
     propsData,
     listeners,
@@ -4179,14 +4183,14 @@
     }
   }
 
-  function isInInactiveTree (vm) {
+  function isInInactiveTree(vm) {
     while (vm && (vm = vm.$parent)) {
       if (vm._inactive) { return true }
     }
     return false
   }
 
-  function activateChildComponent (vm, direct) {
+  function activateChildComponent(vm, direct) {
     if (direct) {
       vm._directInactive = false;
       if (isInInactiveTree(vm)) {
@@ -4204,7 +4208,7 @@
     }
   }
 
-  function deactivateChildComponent (vm, direct) {
+  function deactivateChildComponent(vm, direct) {
     if (direct) {
       vm._directInactive = true;
       if (isInInactiveTree(vm)) {
@@ -4220,7 +4224,7 @@
     }
   }
 
-  function callHook (vm, hook) {
+  function callHook(vm, hook) {
     // #7573 disable dep collection when invoking lifecycle hooks
     pushTarget();
     var handlers = vm.$options[hook];
@@ -4425,8 +4429,10 @@
    * A watcher parses an expression, collects dependencies,
    * and fires callback when the expression value changes.
    * This is used for both the $watch() api and directives.
+   * 
+   * 每个watch 对应 一个表达式
    */
-  var Watcher = function Watcher (
+  var Watcher = function Watcher(
     vm,
     expOrFn,
     cb,
@@ -4452,6 +4458,8 @@
     this.id = ++uid$1; // uid for batching
     this.active = true;
     this.dirty = this.lazy; // for lazy watchers
+
+    // 初始化dep
     this.deps = [];
     this.newDeps = [];
     this.depIds = new _Set();
@@ -4482,6 +4490,7 @@
    * Evaluate the getter, and re-collect dependencies.
    */
   Watcher.prototype.get = function get () {
+    // 赋值Dep.target = Watcher 
     pushTarget(this);
     var value;
     var vm = this.vm;
@@ -4967,8 +4976,10 @@
 
   var uid$2 = 0;
 
-  function initMixin (Vue) {
+  function initMixin(Vue) {
     Vue.prototype._init = function (options) {
+
+      // vm 表示vue 实例  options 表示vue实例的初始化的options对象
       var vm = this;
       // a uid
       vm._uid = uid$2++;
@@ -4983,13 +4994,16 @@
 
       // a flag to avoid this being observed
       vm._isVue = true;
-      // merge options
+
+      // 组件合并options
       if (options && options._isComponent) {
         // optimize internal component instantiation
         // since dynamic options merging is pretty slow, and none of the
         // internal component options needs special treatment.
         initInternalComponent(vm, options);
       } else {
+
+        // 增加vue实例的$options
         vm.$options = mergeOptions(
           resolveConstructorOptions(vm.constructor),
           options || {},
@@ -5007,6 +5021,8 @@
       initRender(vm);
       callHook(vm, 'beforeCreate');
       initInjections(vm); // resolve injections before data/props
+
+      //初始化页面的状态 - observer 观察data属性
       initState(vm);
       initProvide(vm); // resolve provide after data/props
       callHook(vm, 'created');
@@ -5019,12 +5035,13 @@
       }
 
       if (vm.$options.el) {
+        // 挂载之后开始 模板编译
         vm.$mount(vm.$options.el);
       }
     };
   }
 
-  function initInternalComponent (vm, options) {
+  function initInternalComponent(vm, options) {
     var opts = vm.$options = Object.create(vm.constructor.options);
     // doing this because it's faster than dynamic enumeration.
     var parentVnode = options._parentVnode;
@@ -5043,7 +5060,7 @@
     }
   }
 
-  function resolveConstructorOptions (Ctor) {
+  function resolveConstructorOptions(Ctor) {
     var options = Ctor.options;
     if (Ctor.super) {
       var superOptions = resolveConstructorOptions(Ctor.super);
@@ -5067,7 +5084,7 @@
     return options
   }
 
-  function resolveModifiedOptions (Ctor) {
+  function resolveModifiedOptions(Ctor) {
     var modified;
     var latest = Ctor.options;
     var sealed = Ctor.sealedOptions;
@@ -9621,7 +9638,7 @@
   var platformGetTagNamespace;
   var maybeComponent;
 
-  function createASTElement (
+  function createASTElement(
     tag,
     attrs,
     parent
@@ -9639,8 +9656,9 @@
 
   /**
    * Convert HTML string to AST.
+   * 转化HTML 字符串 -> AST
    */
-  function parse (
+  function parse(
     template,
     options
   ) {
@@ -9671,14 +9689,14 @@
     var inPre = false;
     var warned = false;
 
-    function warnOnce (msg, range) {
+    function warnOnce(msg, range) {
       if (!warned) {
         warned = true;
         warn$2(msg, range);
       }
     }
 
-    function closeElement (element) {
+    function closeElement(element) {
       trimEndingWhitespace(element);
       if (!inVPre && !element.processed) {
         element = processElement(element, options);
@@ -9712,7 +9730,7 @@
             // keep it in the children list so that v-else(-if) conditions can
             // find it as the prev node.
             var name = element.slotTarget || '"default"'
-            ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element;
+              ; (currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element;
           }
           currentParent.children.push(element);
           element.parent = currentParent;
@@ -9738,7 +9756,7 @@
       }
     }
 
-    function trimEndingWhitespace (el) {
+    function trimEndingWhitespace(el) {
       // remove trailing whitespace node
       if (!inPre) {
         var lastNode;
@@ -9752,7 +9770,7 @@
       }
     }
 
-    function checkRootConstraints (el) {
+    function checkRootConstraints(el) {
       if (el.tag === 'slot' || el.tag === 'template') {
         warnOnce(
           "Cannot use <" + (el.tag) + "> as component root element because it may " +
@@ -9778,7 +9796,7 @@
       shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
       shouldKeepComment: options.comments,
       outputSourceRange: options.outputSourceRange,
-      start: function start (tag, attrs, unary, start$1, end) {
+      start: function start(tag, attrs, unary, start$1, end) {
         // check namespace.
         // inherit parent ns if there is one
         var ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag);
@@ -9865,7 +9883,7 @@
         }
       },
 
-      end: function end (tag, start, end$1) {
+      end: function end(tag, start, end$1) {
         var element = stack[stack.length - 1];
         // pop stack
         stack.length -= 1;
@@ -9876,7 +9894,7 @@
         closeElement(element);
       },
 
-      chars: function chars (text, start, end) {
+      chars: function chars(text, start, end) {
         if (!currentParent) {
           {
             if (text === template) {
@@ -9947,7 +9965,7 @@
           }
         }
       },
-      comment: function comment (text, start, end) {
+      comment: function comment(text, start, end) {
         // adding anything as a sibling to the root node is forbidden
         // comments should still be allowed, but ignored
         if (currentParent) {
@@ -9967,13 +9985,13 @@
     return root
   }
 
-  function processPre (el) {
+  function processPre(el) {
     if (getAndRemoveAttr(el, 'v-pre') != null) {
       el.pre = true;
     }
   }
 
-  function processRawAttrs (el) {
+  function processRawAttrs(el) {
     var list = el.attrsList;
     var len = list.length;
     if (len) {
@@ -9994,7 +10012,7 @@
     }
   }
 
-  function processElement (
+  function processElement(
     element,
     options
   ) {
@@ -10019,7 +10037,7 @@
     return element
   }
 
-  function processKey (el) {
+  function processKey(el) {
     var exp = getBindingAttr(el, 'key');
     if (exp) {
       {
@@ -10046,7 +10064,7 @@
     }
   }
 
-  function processRef (el) {
+  function processRef(el) {
     var ref = getBindingAttr(el, 'ref');
     if (ref) {
       el.ref = ref;
@@ -10054,7 +10072,7 @@
     }
   }
 
-  function processFor (el) {
+  function processFor(el) {
     var exp;
     if ((exp = getAndRemoveAttr(el, 'v-for'))) {
       var res = parseFor(exp);
@@ -10071,7 +10089,7 @@
 
 
 
-  function parseFor (exp) {
+  function parseFor(exp) {
     var inMatch = exp.match(forAliasRE);
     if (!inMatch) { return }
     var res = {};
@@ -10090,7 +10108,7 @@
     return res
   }
 
-  function processIf (el) {
+  function processIf(el) {
     var exp = getAndRemoveAttr(el, 'v-if');
     if (exp) {
       el.if = exp;
@@ -10109,7 +10127,7 @@
     }
   }
 
-  function processIfConditions (el, parent) {
+  function processIfConditions(el, parent) {
     var prev = findPrevElement(parent.children);
     if (prev && prev.if) {
       addIfCondition(prev, {
@@ -10125,7 +10143,7 @@
     }
   }
 
-  function findPrevElement (children) {
+  function findPrevElement(children) {
     var i = children.length;
     while (i--) {
       if (children[i].type === 1) {
@@ -10143,14 +10161,14 @@
     }
   }
 
-  function addIfCondition (el, condition) {
+  function addIfCondition(el, condition) {
     if (!el.ifConditions) {
       el.ifConditions = [];
     }
     el.ifConditions.push(condition);
   }
 
-  function processOnce (el) {
+  function processOnce(el) {
     var once = getAndRemoveAttr(el, 'v-once');
     if (once != null) {
       el.once = true;
@@ -10159,7 +10177,7 @@
 
   // handle content being passed to a component as slot,
   // e.g. <template slot="xxx">, <div slot-scope="xxx">
-  function processSlotContent (el) {
+  function processSlotContent(el) {
     var slotScope;
     if (el.tag === 'template') {
       slotScope = getAndRemoveAttr(el, 'scope');
@@ -10278,7 +10296,7 @@
     }
   }
 
-  function getSlotName (binding) {
+  function getSlotName(binding) {
     var name = binding.name.replace(slotRE, '');
     if (!name) {
       if (binding.name[0] !== '#') {
@@ -10298,7 +10316,7 @@
   }
 
   // handle <slot/> outlets
-  function processSlotOutlet (el) {
+  function processSlotOutlet(el) {
     if (el.tag === 'slot') {
       el.slotName = getBindingAttr(el, 'name');
       if ( el.key) {
@@ -10312,7 +10330,7 @@
     }
   }
 
-  function processComponent (el) {
+  function processComponent(el) {
     var binding;
     if ((binding = getBindingAttr(el, 'is'))) {
       el.component = binding;
@@ -10322,7 +10340,7 @@
     }
   }
 
-  function processAttrs (el) {
+  function processAttrs(el) {
     var list = el.attrsList;
     var i, l, name, rawName, value, modifiers, syncGen, isDynamic;
     for (i = 0, l = list.length; i < l; i++) {
@@ -10448,15 +10466,15 @@
         // #6887 firefox doesn't update muted state if set via attribute
         // even immediately after element creation
         if (!el.component &&
-            name === 'muted' &&
-            platformMustUseProp(el.tag, el.attrsMap.type, name)) {
+          name === 'muted' &&
+          platformMustUseProp(el.tag, el.attrsMap.type, name)) {
           addProp(el, name, 'true', list[i]);
         }
       }
     }
   }
 
-  function checkInFor (el) {
+  function checkInFor(el) {
     var parent = el;
     while (parent) {
       if (parent.for !== undefined) {
@@ -10467,7 +10485,7 @@
     return false
   }
 
-  function parseModifiers (name) {
+  function parseModifiers(name) {
     var match = name.match(modifierRE);
     if (match) {
       var ret = {};
@@ -10476,7 +10494,7 @@
     }
   }
 
-  function makeAttrsMap (attrs) {
+  function makeAttrsMap(attrs) {
     var map = {};
     for (var i = 0, l = attrs.length; i < l; i++) {
       if (
@@ -10491,11 +10509,11 @@
   }
 
   // for script (e.g. type="x/template") or style, do not decode content
-  function isTextTag (el) {
+  function isTextTag(el) {
     return el.tag === 'script' || el.tag === 'style'
   }
 
-  function isForbiddenTag (el) {
+  function isForbiddenTag(el) {
     return (
       el.tag === 'style' ||
       (el.tag === 'script' && (
@@ -10509,7 +10527,7 @@
   var ieNSPrefix = /^NS\d+:/;
 
   /* istanbul ignore next */
-  function guardIESVGBug (attrs) {
+  function guardIESVGBug(attrs) {
     var res = [];
     for (var i = 0; i < attrs.length; i++) {
       var attr = attrs[i];
@@ -10521,7 +10539,7 @@
     return res
   }
 
-  function checkForAliasModel (el, value) {
+  function checkForAliasModel(el, value) {
     var _el = el;
     while (_el) {
       if (_el.for && _el.alias === value) {
@@ -11704,7 +11722,7 @@
 
 
 
-  function createFunction (code, errors) {
+  function createFunction(code, errors) {
     try {
       return new Function(code)
     } catch (err) {
@@ -11713,10 +11731,10 @@
     }
   }
 
-  function createCompileToFunctionFn (compile) {
+  function createCompileToFunctionFn(compile) {
     var cache = Object.create(null);
 
-    return function compileToFunctions (
+    return function compileToFunctions(
       template,
       options,
       vm
@@ -11751,7 +11769,7 @@
         return cache[key]
       }
 
-      // compile
+      // 编译模板
       var compiled = compile(template, options);
 
       // check compilation errors/tips
@@ -11815,9 +11833,14 @@
 
   /*  */
 
-  function createCompilerCreator (baseCompile) {
-    return function createCompiler (baseOptions) {
-      function compile (
+  /**
+   * 创建编译器
+   * @param {*} baseCompile 
+   * @returns 
+   */
+  function createCompilerCreator(baseCompile) {
+    return function createCompiler(baseOptions) {
+      function compile(
         template,
         options
       ) {
@@ -11890,14 +11913,25 @@
   // `createCompilerCreator` allows creating compilers that use alternative
   // parser/optimizer/codegen, e.g the SSR optimizing compiler.
   // Here we just export a default compiler using the default parts.
-  var createCompiler = createCompilerCreator(function baseCompile (
+  /**
+   *  编译模板字符串的代码,e,g '<div id="app">    <h5>我是app</h5>    <input type="text" v-model="iText">    <div>输入的值：{{iText}}</div>    <div>{{formObject.name}}</div>  </div>'
+   *  解析、优化、代码生成
+   * 
+   * 
+   */
+  var createCompiler = createCompilerCreator(function baseCompile(
     template,
     options
   ) {
+    // 1. 解析html代码字符串为ast
     var ast = parse(template.trim(), options);
+
+    // 2.是否优化代码
     if (options.optimize !== false) {
       optimize(ast, options);
     }
+
+    // 3. 代码生成
     var code = generate(ast, options);
     return {
       ast: ast,
@@ -11933,6 +11967,9 @@
     return el && el.innerHTML
   });
 
+  /**
+   * 组件挂载, 挂载之前先保留之前的属性挂载函数
+   */
   var mount = Vue.prototype.$mount;
   Vue.prototype.$mount = function (
     el,
@@ -11951,6 +11988,7 @@
     var options = this.$options;
     // resolve template/el and convert to render function
     if (!options.render) {
+      // 首先判断 属性模板
       var template = options.template;
       if (template) {
         if (typeof template === 'string') {
@@ -11978,9 +12016,11 @@
       if (template) {
         /* istanbul ignore if */
         if ( config.performance && mark) {
+          // 开始编译的mark
           mark('compile');
         }
 
+        // 开始编译模板函数
         var ref = compileToFunctions(template, {
           outputSourceRange: "development" !== 'production',
           shouldDecodeNewlines: shouldDecodeNewlines,
@@ -11995,11 +12035,14 @@
 
         /* istanbul ignore if */
         if ( config.performance && mark) {
+          // 结束编译的mark
           mark('compile end');
+
           measure(("vue " + (this._name) + " compile"), 'compile', 'compile end');
         }
       }
     }
+    // 再次调用$mount
     return mount.call(this, el, hydrating)
   };
 
@@ -12007,7 +12050,7 @@
    * Get outerHTML of elements, taking care
    * of SVG elements in IE as well.
    */
-  function getOuterHTML (el) {
+  function getOuterHTML(el) {
     if (el.outerHTML) {
       return el.outerHTML
     } else {
