@@ -157,7 +157,7 @@ function callActivatedHooks (queue) {
 }
 
 /**
- * Push a watcher into the watcher queue.
+ * watcher 的队列 - 不是立即更新,是把更新的water放入队列中，如果队列不存在就queue.push，需等待下一个tick在更新
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
  */
@@ -184,6 +184,7 @@ export function queueWatcher (watcher: Watcher) {
         flushSchedulerQueue()
         return
       }
+      // 下一个事件循序在更新
       nextTick(flushSchedulerQueue)
     }
   }

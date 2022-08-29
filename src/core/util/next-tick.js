@@ -39,6 +39,11 @@ let timerFunc
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
 /* istanbul ignore next, $flow-disable-line */
+/**
+ * 优先检查
+ * 是否支持micro tasks ： Promise -> MutationObserver -> setImmediate
+ * 都不支持使用macro tasks : setTimeout
+ */
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const p = Promise.resolve()
   timerFunc = () => {
