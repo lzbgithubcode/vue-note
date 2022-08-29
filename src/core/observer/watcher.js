@@ -95,6 +95,7 @@ export default class Watcher {
         )
       }
     }
+    // 创建watcher 调用get方法
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -109,6 +110,7 @@ export default class Watcher {
     let value
     const vm = this.vm
     try {
+      // 调用数据的get方法
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {

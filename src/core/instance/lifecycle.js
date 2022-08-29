@@ -187,14 +187,14 @@ export function mountComponent(
     }
   } else {
     updateComponent = () => {
-      vm._update(vm._render(), hydrating)
+      vm._update(vm._render(), h ydrating)
     }
   }
 
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
-  // 创建一个watcher
+  // 解析模板之后 创建一个watcher
   new Watcher(vm, updateComponent, noop, {
     before() {
       if (vm._isMounted && !vm._isDestroyed) {

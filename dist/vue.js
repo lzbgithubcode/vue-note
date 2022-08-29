@@ -1000,6 +1000,7 @@
       Object.isExtensible(value) &&
       !value._isVue
     ) {
+      // 创建obser
       ob = new Observer(value);
     }
     if (asRootData && ob) {
@@ -1018,6 +1019,8 @@
     customSetter,
     shallow
   ) {
+
+    // 创建一个dep， 每一个指令都会创建一个dep俩管理dep中watcher集合
     var dep = new Dep();
 
     var property = Object.getOwnPropertyDescriptor(obj, key);
@@ -1034,14 +1037,15 @@
 
     var childOb = !shallow && observe(val);
 
-    // 观察obj 的 key 变化， 重写了set/get方法
+    // 观察obj 的 key 变化， 重写了set/get方法（）
     Object.defineProperty(obj, key, {
       enumerable: true,
       configurable: true,
       get: function reactiveGetter() {
         var value = getter ? getter.call(obj) : val;
-
+        // 如果Dep.target 有 值，就增加到dep数组中
         if (Dep.target) {
+          // 增加到dep中
           dep.depend();
           if (childOb) {
             childOb.dep.depend();
@@ -1070,6 +1074,7 @@
           val = newVal;
         }
         childOb = !shallow && observe(newVal);
+        // 更新dep中保存的water数组，遍历数组并更新对象的值
         dep.notify();
       }
     });
@@ -4083,7 +4088,7 @@
     // we set this to vm._watcher inside the watcher's constructor
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
-    // 创建一个watcher
+    // 解析模板之后 创建一个watcher
     new Watcher(vm, updateComponent, noop, {
       before: function before() {
         if (vm._isMounted && !vm._isDestroyed) {
@@ -4481,6 +4486,7 @@
         );
       }
     }
+    // 创建watcher 调用get方法
     this.value = this.lazy
       ? undefined
       : this.get();
@@ -4495,6 +4501,7 @@
     var value;
     var vm = this.vm;
     try {
+      // 调用数据的get方法
       value = this.getter.call(vm, vm);
     } catch (e) {
       if (this.user) {
@@ -11770,6 +11777,13 @@
       }
 
       // 编译模板
+      /** 编译的结果{ast, render}
+       * ast: {type: 1, tag: 'div', attrsList: Array(1), attrsMap: {…}, rawAttrsMap: {…}, …}
+        errors: []
+        render: "with(this){return _c('div',{attrs:{\"id\":\"app\"}},[_c('h5',[_v(\"我是app\")]),_v(\" \"),_c('input',{directives:[{name:\"model\",rawName:\"v-model\",value:(iText),expression:\"iText\"}],attrs:{\"type\":\"text\"},domProps:{\"value\":(iText)},on:{\"input\":function($event){if($event.target.composing)return;iText=$event.target.value}}}),_v(\" \"),_c('div',[_v(\"输入的值：\"+_s(iText))]),_v(\" \"),_c('div',[_v(_s(formObject.name))])])}"
+        staticRenderFns: []
+        tips: []
+       */
       var compiled = compile(template, options);
 
       // check compilation errors/tips
@@ -11803,6 +11817,7 @@
       // turn code into functions
       var res = {};
       var fnGenErrors = [];
+      // 把编译的结果给render函数
       res.render = createFunction(compiled.render, fnGenErrors);
       res.staticRenderFns = compiled.staticRenderFns.map(function (code) {
         return createFunction(code, fnGenErrors)
@@ -12020,7 +12035,7 @@
           mark('compile');
         }
 
-        // 开始编译模板函数
+        // 开始编译模板函数 - 或者到render函数
         var ref = compileToFunctions(template, {
           outputSourceRange: "development" !== 'production',
           shouldDecodeNewlines: shouldDecodeNewlines,

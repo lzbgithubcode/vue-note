@@ -57,6 +57,13 @@ export function createCompileToFunctionFn(compile: Function): Function {
     }
 
     // 编译模板
+    /** 编译的结果{ast, render}
+     * ast: {type: 1, tag: 'div', attrsList: Array(1), attrsMap: {…}, rawAttrsMap: {…}, …}
+      errors: []
+      render: "with(this){return _c('div',{attrs:{\"id\":\"app\"}},[_c('h5',[_v(\"我是app\")]),_v(\" \"),_c('input',{directives:[{name:\"model\",rawName:\"v-model\",value:(iText),expression:\"iText\"}],attrs:{\"type\":\"text\"},domProps:{\"value\":(iText)},on:{\"input\":function($event){if($event.target.composing)return;iText=$event.target.value}}}),_v(\" \"),_c('div',[_v(\"输入的值：\"+_s(iText))]),_v(\" \"),_c('div',[_v(_s(formObject.name))])])}"
+      staticRenderFns: []
+      tips: []
+     */
     const compiled = compile(template, options)
 
     // check compilation errors/tips
@@ -90,6 +97,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
     // turn code into functions
     const res = {}
     const fnGenErrors = []
+    // 把编译的结果给render函数
     res.render = createFunction(compiled.render, fnGenErrors)
     res.staticRenderFns = compiled.staticRenderFns.map(code => {
       return createFunction(code, fnGenErrors)

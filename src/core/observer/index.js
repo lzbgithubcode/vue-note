@@ -121,6 +121,7 @@ export function observe(value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
+    // 创建obser
     ob = new Observer(value)
   }
   if (asRootData && ob) {
@@ -139,6 +140,8 @@ export function defineReactive(
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+
+  // 创建一个dep， 每一个指令都会创建一个dep俩管理dep中watcher集合
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -155,14 +158,15 @@ export function defineReactive(
 
   let childOb = !shallow && observe(val)
 
-  // 观察obj 的 key 变化， 重写了set/get方法
+  // 观察obj 的 key 变化， 重写了set/get方法（）
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter() {
       const value = getter ? getter.call(obj) : val
-
+      // 如果Dep.target 有 值，就增加到dep数组中
       if (Dep.target) {
+        // 增加到dep中
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
@@ -191,6 +195,7 @@ export function defineReactive(
         val = newVal
       }
       childOb = !shallow && observe(newVal)
+      // 更新dep中保存的water数组，遍历数组并更新对象的值
       dep.notify()
     }
   })
