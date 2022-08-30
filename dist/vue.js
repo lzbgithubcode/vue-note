@@ -3955,6 +3955,10 @@
   }
 
   function lifecycleMixin(Vue) {
+
+    /**
+     * 更新组件的方法 输入一个vnode
+     */
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
       var prevEl = vm.$el;
@@ -4036,13 +4040,16 @@
       }
     };
   }
-
+  /**
+   * 挂载组件
+   */
   function mountComponent(
     vm,
     el,
     hydrating
   ) {
     vm.$el = el;
+    // 挂载之前就已经准备好可以render(编译生成的render函数)
     if (!vm.$options.render) {
       vm.$options.render = createEmptyVNode;
       {
@@ -4063,6 +4070,7 @@
         }
       }
     }
+    // 调用挂载之前的hooks
     callHook(vm, 'beforeMount');
 
     // 更新组件

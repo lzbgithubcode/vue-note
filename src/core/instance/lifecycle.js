@@ -56,6 +56,10 @@ export function initLifecycle(vm: Component) {
 }
 
 export function lifecycleMixin(Vue: Class<Component>) {
+
+  /**
+   * 更新组件的方法 输入一个vnode
+   */
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
@@ -137,13 +141,16 @@ export function lifecycleMixin(Vue: Class<Component>) {
     }
   }
 }
-
+/**
+ * 挂载组件
+ */
 export function mountComponent(
   vm: Component,
   el: ?Element,
   hydrating?: boolean
 ): Component {
   vm.$el = el
+  // 挂载之前就已经准备好可以render(编译生成的render函数)
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -164,6 +171,7 @@ export function mountComponent(
       }
     }
   }
+  // 调用挂载之前的hooks
   callHook(vm, 'beforeMount')
 
   // 更新组件
