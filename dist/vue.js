@@ -3198,7 +3198,9 @@
   };
 
   var hooksToMerge = Object.keys(componentVNodeHooks);
-
+  /**
+   * 
+   */
   function createComponent (
     Ctor,
     data,
@@ -3367,8 +3369,9 @@
   var SIMPLE_NORMALIZE = 1;
   var ALWAYS_NORMALIZE = 2;
 
-  // wrapper function for providing a more flexible interface
-  // without getting yelled at by flow
+  /**
+   * 创建虚拟dom
+   */
   function createElement (
     context,
     tag,
@@ -3388,6 +3391,9 @@
     return _createElement(context, tag, data, children, normalizationType)
   }
 
+  /**
+   * 创建虚拟dom
+   */
   function _createElement (
     context,
     tag,
@@ -3459,6 +3465,7 @@
         // unknown or unlisted namespaced elements
         // check at runtime because it may get assigned a namespace when its
         // parent normalizes children
+        // 正在创建虚拟DOM节点
         vnode = new VNode(
           tag, data, children,
           undefined, undefined, context
@@ -3553,6 +3560,9 @@
       return nextTick(fn, this)
     };
 
+    /**
+     * 渲染阶段  createEmptyVNode/ createElement（虚拟dom）/ 
+     */
     Vue.prototype._render = function () {
       var vm = this;
       var ref = vm.$options;
@@ -3577,6 +3587,7 @@
         // separately from one another. Nested component's render fns are called
         // when parent component is patched.
         currentRenderingInstance = vm;
+        // 调用render 创建虚拟dom
         vnode = render.call(vm._renderProxy, vm.$createElement);
       } catch (e) {
         handleError(e, vm, "render");
@@ -3609,6 +3620,7 @@
             vm
           );
         }
+        // 创建空的虚拟dom
         vnode = createEmptyVNode();
       }
       // set parent
@@ -5312,6 +5324,9 @@
     return false
   }
 
+  /**
+   * 遍历清楚缓存cache
+   */
   function pruneCache (keepAliveInstance, filter) {
     var cache = keepAliveInstance.cache;
     var keys = keepAliveInstance.keys;
@@ -5326,7 +5341,9 @@
       }
     }
   }
-
+  /**
+   * 移除单个组件
+   */
   function pruneCacheEntry (
     cache,
     key,
@@ -5334,9 +5351,11 @@
     current
   ) {
     var entry = cache[key];
+    // 每个组件实例销毁
     if (entry && (!current || entry.tag !== current.tag)) {
       entry.componentInstance.$destroy();
     }
+    // 清除缓存的key
     cache[key] = null;
     remove(keys, key);
   }
@@ -5345,15 +5364,16 @@
 
   var KeepAlive = {
     name: 'keep-alive',
-    abstract: true,
+    abstract: true,   // 定义为抽象组件，不渲染为真实dom
 
     props: {
-      include: patternTypes,
-      exclude: patternTypes,
-      max: [String, Number]
+      include: patternTypes,   // 缓存的白名单
+      exclude: patternTypes,  //  缓存的黑名单
+      max: [String, Number]    // 缓存组件实例数量的最大值，用户LRU(缓存淘汰算法的最大值)
     },
 
     methods: {
+      // 缓存组件
       cacheVNode: function cacheVNode() {
         var ref = this;
         var cache = ref.cache;
@@ -5370,7 +5390,7 @@
             componentInstance: componentInstance,
           };
           keys.push(keyToCache);
-          // prune oldest entry
+          // 如果缓存的值大于设置的最大值就移除最数组第一个
           if (this.max && keys.length > parseInt(this.max)) {
             pruneCacheEntry(cache, keys[0], keys, this._vnode);
           }
@@ -5380,11 +5400,13 @@
     },
 
     created: function created () {
+      // 创建一个无原型链的缓存对象 - 缓存虚拟dom
       this.cache = Object.create(null);
-      this.keys = [];
+      this.keys = [];  // 缓存虚拟dom的key值集合
     },
 
     destroyed: function destroyed () {
+      // 删除所有的缓存虚拟dom
       for (var key in this.cache) {
         pruneCacheEntry(this.cache, key, this.keys);
       }
@@ -5394,9 +5416,11 @@
       var this$1 = this;
 
       this.cacheVNode();
+      // 实时监听白名单的变动
       this.$watch('include', function (val) {
         pruneCache(this$1, function (name) { return matches(val, name); });
       });
+      // 实时监听黑名单的变动
       this.$watch('exclude', function (val) {
         pruneCache(this$1, function (name) { return !matches(val, name); });
       });
@@ -5408,10 +5432,10 @@
 
     render: function render () {
       var slot = this.$slots.default;
-      var vnode = getFirstComponentChild(slot);
+      var vnode = getFirstComponentChild(slot); //找个第一个子组件的Vnode节点
       var componentOptions = vnode && vnode.componentOptions;
       if (componentOptions) {
-        // check pattern
+        // check pattern  匹配组件名称name
         var name = getComponentName(componentOptions);
         var ref = this;
         var include = ref.include;
@@ -5428,18 +5452,20 @@
         var ref$1 = this;
         var cache = ref$1.cache;
         var keys = ref$1.keys;
+        //定义组件的key
         var key = vnode.key == null
           // same constructor may get registered as different local components
           // so cid alone is not enough (#3269)
           ? componentOptions.Ctor.cid + (componentOptions.tag ? ("::" + (componentOptions.tag)) : '')
           : vnode.key;
+        // 如果缓存存在从缓存中获取组件实例
         if (cache[key]) {
           vnode.componentInstance = cache[key].componentInstance;
-          // make current key freshest
+          // 删除之前的key, 重新再新增key - 调整key的顺序
           remove(keys, key);
           keys.push(key);
         } else {
-          // delay setting the cache until update
+          // delay setting the cache until update  延迟设置组件缓存
           this.vnodeToCache = vnode;
           this.keyToCache = key;
         }

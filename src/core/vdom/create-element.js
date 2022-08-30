@@ -23,8 +23,9 @@ import {
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2
 
-// wrapper function for providing a more flexible interface
-// without getting yelled at by flow
+/**
+ * 创建虚拟dom
+ */
 export function createElement (
   context: Component,
   tag: any,
@@ -44,6 +45,9 @@ export function createElement (
   return _createElement(context, tag, data, children, normalizationType)
 }
 
+/**
+ * 创建虚拟dom
+ */
 export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,
@@ -115,6 +119,7 @@ export function _createElement (
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
+      // 正在创建虚拟DOM节点
       vnode = new VNode(
         tag, data, children,
         undefined, undefined, context

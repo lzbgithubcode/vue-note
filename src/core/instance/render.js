@@ -66,6 +66,9 @@ export function renderMixin (Vue: Class<Component>) {
     return nextTick(fn, this)
   }
 
+  /**
+   * 渲染阶段  createEmptyVNode/ createElement（虚拟dom）/ 
+   */
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
@@ -88,6 +91,7 @@ export function renderMixin (Vue: Class<Component>) {
       // separately from one another. Nested component's render fns are called
       // when parent component is patched.
       currentRenderingInstance = vm
+      // 调用render 创建虚拟dom
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render`)
@@ -120,6 +124,7 @@ export function renderMixin (Vue: Class<Component>) {
           vm
         )
       }
+      // 创建空的虚拟dom
       vnode = createEmptyVNode()
     }
     // set parent
