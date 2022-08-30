@@ -10,6 +10,9 @@ type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
 type DirectiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean;
 
+/**
+ * 初始化代码生成的状态
+ */
 export class CodegenState {
   options: CompilerOptions;
   warn: Function;
@@ -35,11 +38,15 @@ export class CodegenState {
   }
 }
 
+// 生成结果类型定义
 export type CodegenResult = {
   render: string,
   staticRenderFns: Array<string>
 };
 
+/**
+ * 代码生成， 传入优化之后的ast
+ */
 export function generate (
   ast: ASTElement | void,
   options: CompilerOptions
@@ -47,6 +54,7 @@ export function generate (
   const state = new CodegenState(options)
   // fix #11483, Root level <script> tags should not be rendered.
   const code = ast ? (ast.tag === 'script' ? 'null' : genElement(ast, state)) : '_c("div")'
+  // 返回with包装的html代码片段
   return {
     render: `with(this){return ${code}}`,
     staticRenderFns: state.staticRenderFns

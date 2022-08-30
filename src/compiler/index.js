@@ -12,6 +12,10 @@ import { createCompilerCreator } from './create-compiler'
  *  编译模板字符串的代码,e,g '<div id="app">    <h5>我是app</h5>    <input type="text" v-model="iText">    <div>输入的值：{{iText}}</div>    <div>{{formObject.name}}</div>  </div>'
  *  解析、优化、代码生成
  * 
+ * 代码生成的结果
+ *  render:'with(this){return _c('div',{attrs:{"id":"app"}},[_c('h5',[_v("我是app")]),_v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(iText),expression:"iText"}],attrs:{"type":"text"},domProps:{"value":(iText)},on:{"input":function($event){if($event.target.composing)return;iText=$event.target.value}}}),_v(" "),_c('div',[_v("输入的值："+_s(iText))]),_v(" "),_c('div',[_v(_s(formObject.name))])])}'
+    staticRenderFns:(0) []
+ * 
  * 
  */
 export const createCompiler = createCompilerCreator(function baseCompile(
@@ -41,6 +45,12 @@ export const createCompiler = createCompilerCreator(function baseCompile(
   }
 
   // 3. 代码生成
+  /**
+   * 格式：
+   *  
+  render:'with(this){return _c('div',{attrs:{"id":"app"}},[_c('h5',[_v("我是app")]),_v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(iText),expression:"iText"}],attrs:{"type":"text"},domProps:{"value":(iText)},on:{"input":function($event){if($event.target.composing)return;iText=$event.target.value}}}),_v(" "),_c('div',[_v("输入的值："+_s(iText))]),_v(" "),_c('div',[_v(_s(formObject.name))])])}'
+  staticRenderFns:(0) []
+   */
   const code = generate(ast, options)
   return {
     ast,

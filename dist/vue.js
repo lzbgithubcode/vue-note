@@ -11029,6 +11029,9 @@
 
 
 
+  /**
+   * 初始化代码生成的状态
+   */
   var CodegenState = function CodegenState (options) {
     this.options = options;
     this.warn = options.warn || baseWarn;
@@ -11042,8 +11045,12 @@
     this.pre = false;
   };
 
+  // 生成结果类型定义
 
 
+  /**
+   * 代码生成， 传入优化之后的ast
+   */
   function generate (
     ast,
     options
@@ -11051,6 +11058,7 @@
     var state = new CodegenState(options);
     // fix #11483, Root level <script> tags should not be rendered.
     var code = ast ? (ast.tag === 'script' ? 'null' : genElement(ast, state)) : '_c("div")';
+    // 返回with包装的html代码片段
     return {
       render: ("with(this){return " + code + "}"),
       staticRenderFns: state.staticRenderFns
@@ -11965,6 +11973,10 @@
    *  编译模板字符串的代码,e,g '<div id="app">    <h5>我是app</h5>    <input type="text" v-model="iText">    <div>输入的值：{{iText}}</div>    <div>{{formObject.name}}</div>  </div>'
    *  解析、优化、代码生成
    * 
+   * 代码生成的结果
+   *  render:'with(this){return _c('div',{attrs:{"id":"app"}},[_c('h5',[_v("我是app")]),_v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(iText),expression:"iText"}],attrs:{"type":"text"},domProps:{"value":(iText)},on:{"input":function($event){if($event.target.composing)return;iText=$event.target.value}}}),_v(" "),_c('div',[_v("输入的值："+_s(iText))]),_v(" "),_c('div',[_v(_s(formObject.name))])])}'
+      staticRenderFns:(0) []
+   * 
    * 
    */
   var createCompiler = createCompilerCreator(function baseCompile(
@@ -11994,6 +12006,12 @@
     }
 
     // 3. 代码生成
+    /**
+     * 格式：
+     *  
+    render:'with(this){return _c('div',{attrs:{"id":"app"}},[_c('h5',[_v("我是app")]),_v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(iText),expression:"iText"}],attrs:{"type":"text"},domProps:{"value":(iText)},on:{"input":function($event){if($event.target.composing)return;iText=$event.target.value}}}),_v(" "),_c('div',[_v("输入的值："+_s(iText))]),_v(" "),_c('div',[_v(_s(formObject.name))])])}'
+    staticRenderFns:(0) []
+     */
     var code = generate(ast, options);
     return {
       ast: ast,
