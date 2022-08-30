@@ -1955,6 +1955,11 @@
   // completely stops working after triggering a few times... so, if native
   // Promise is available, we will use it:
   /* istanbul ignore next, $flow-disable-line */
+  /**
+   * 优先检查
+   * 是否支持micro tasks ： Promise -> MutationObserver -> setImmediate
+   * 都不支持使用macro tasks : setTimeout
+   */
   if (typeof Promise !== 'undefined' && isNative(Promise)) {
     var p = Promise.resolve();
     timerFunc = function () {
@@ -4060,6 +4065,7 @@
     }
     callHook(vm, 'beforeMount');
 
+    // 更新组件
     var updateComponent;
     /* istanbul ignore if */
     if ( config.performance && mark) {
@@ -4088,7 +4094,7 @@
     // we set this to vm._watcher inside the watcher's constructor
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
-    // 解析模板之后 创建一个watcher
+    // 解析模板之后 创建一个watcher 观察整个组件
     new Watcher(vm, updateComponent, noop, {
       before: function before() {
         if (vm._isMounted && !vm._isDestroyed) {
@@ -4392,7 +4398,7 @@
   }
 
   /**
-   * Push a watcher into the watcher queue.
+   * watcher 的队列 - 不是立即更新,是把更新的water放入队列中，如果队列不存在就queue.push，需等待下一个tick在更新
    * Jobs with duplicate IDs will be skipped unless it's
    * pushed when the queue is being flushed.
    */
@@ -4419,6 +4425,7 @@
           flushSchedulerQueue();
           return
         }
+        // 下一个事件循序在更新
         nextTick(flushSchedulerQueue);
       }
     }
@@ -4567,6 +4574,7 @@
     } else if (this.sync) {
       this.run();
     } else {
+      // 队列调用watcher
       queueWatcher(this);
     }
   };
@@ -9363,6 +9371,11 @@
     var canBeLeftOpenTag = options.canBeLeftOpenTag || no;
     var index = 0;
     var last, lastTag;
+   
+    /**
+     * 解析方式: 各种正则匹配,具体解析参考(http://erik.eae.net/simplehtmlparser/simplehtmlparser.js)
+     * while循环递归解析html 一层一层的解析，解析完成一层就抽离一层，只要html为null, 解析方式: 各种正则匹配
+     */
     while (html) {
       last = html;
       // Make sure we're not in a plaintext content element like script/style
@@ -9645,25 +9658,28 @@
   var platformGetTagNamespace;
   var maybeComponent;
 
+  /**
+   * 自定义AST的元素：描述元素element的js对象
+   */
   function createASTElement(
     tag,
     attrs,
     parent
   ) {
     return {
-      type: 1,
-      tag: tag,
-      attrsList: attrs,
-      attrsMap: makeAttrsMap(attrs),
+      type: 1,   // 节点类型 对应nodeType  1 元素节点  2 属性节点 3 文本节点  
+      tag: tag,       //节点的标识 e.g div/span
+      attrsList: attrs, // 元素的属性数组
+      attrsMap: makeAttrsMap(attrs),  // 元素的属性map
       rawAttrsMap: {},
-      parent: parent,
-      children: []
+      parent: parent,    // 父节点
+      children: []  // 子节点
     }
   }
 
   /**
    * Convert HTML string to AST.
-   * 转化HTML 字符串 -> AST
+   * 转化模版字符串 -> AST
    */
   function parse(
     template,
@@ -9794,6 +9810,7 @@
       }
     }
 
+    //  开始解析html的模版字符串
     parseHTML(template, {
       warn: warn$2,
       expectHTML: options.expectHTML,
@@ -10500,7 +10517,10 @@
       return ret
     }
   }
-
+  /**
+   * 节点的属性数组 -> map对象
+   * 必须包含name/value
+   */
   function makeAttrsMap(attrs) {
     var map = {};
     for (var i = 0, l = attrs.length; i < l; i++) {
@@ -10696,13 +10716,18 @@
    *    create fresh nodes for them on each re-render;
    * 2. Completely skip them in the patching process.
    */
+  /**
+   * 优化的目标:  遍历生成的模板AST树检测纯静态的子树(从来不会改变的dom)
+   * 1. 把静态节点变为常量，不需要重新渲染创建新节点
+   * 2. 在patch过程中跳过他们
+   */
   function optimize (root, options) {
     if (!root) { return }
     isStaticKey = genStaticKeysCached(options.staticKeys || '');
     isPlatformReservedTag = options.isReservedTag || no;
-    // first pass: mark all non-static nodes.
+    // 标记所有非静态节点
     markStatic$1(root);
-    // second pass: mark static roots.
+    // 标记静态节点
     markStaticRoots(root, false);
   }
 
@@ -10713,6 +10738,9 @@
     )
   }
 
+  /**
+   * 递归标记静态节点
+   */
   function markStatic$1 (node) {
     node.static = isStatic(node);
     if (node.type === 1) {
@@ -10774,12 +10802,14 @@
       }
     }
   }
-
+  /**
+   * 是否是静态节点
+   */
   function isStatic (node) {
-    if (node.type === 2) { // expression
+    if (node.type === 2) { // expression  表达式
       return false
     }
-    if (node.type === 3) { // text
+    if (node.type === 3) { // text  文本节点
       return true
     }
     return !!(node.pre || (
@@ -11739,6 +11769,8 @@
   }
 
   function createCompileToFunctionFn(compile) {
+
+    // 创建编译缓存
     var cache = Object.create(null);
 
     return function compileToFunctions(
@@ -11768,7 +11800,7 @@
         }
       }
 
-      // check cache
+      // 如果环境存在就立即 -> 返回创建编译缓存
       var key = options.delimiters
         ? String(options.delimiters) + template
         : template;
@@ -11841,7 +11873,7 @@
           );
         }
       }
-
+      // 设置缓存的结果
       return (cache[key] = res)
     }
   }
@@ -11907,6 +11939,7 @@
 
         finalOptions.warn = warn;
 
+        // 基础编译模板
         var compiled = baseCompile(template.trim(), finalOptions);
         {
           detectErrors(compiled.ast, warn);
@@ -11939,6 +11972,20 @@
     options
   ) {
     // 1. 解析html代码字符串为ast
+    /**
+     * 
+          格式: attrs:(1) [{…}]
+                  attrsList:(1) [{…}]
+                  attrsMap:{id: 'app'}
+                  children:(7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+                  end:147
+                  parent:undefined
+                  plain:false
+                  rawAttrsMap:{id: {…}}
+                  start:0
+                  tag:'div'
+                  type:1
+     */
     var ast = parse(template.trim(), options);
 
     // 2.是否优化代码
@@ -12003,7 +12050,9 @@
     var options = this.$options;
     // resolve template/el and convert to render function
     if (!options.render) {
-      // 首先判断 属性模板
+      /**
+       * 1. 获取template 模版字符串，首先获取template -> 如果有没有就获取el上的html
+       */
       var template = options.template;
       if (template) {
         if (typeof template === 'string') {
@@ -12028,14 +12077,21 @@
       } else if (el) {
         template = getOuterHTML(el);
       }
+
+      /**
+       * 如果template存在就往下编译
+       */
       if (template) {
+
         /* istanbul ignore if */
         if ( config.performance && mark) {
-          // 开始编译的mark
+          // 标记-创建开始编译的mark时间戳
           mark('compile');
         }
 
-        // 开始编译模板函数 - 或者到render函数
+        /**
+         * 2. 开始通过compileToFunctions编译，返回render一级静态render函数
+         */
         var ref = compileToFunctions(template, {
           outputSourceRange: "development" !== 'production',
           shouldDecodeNewlines: shouldDecodeNewlines,
@@ -12050,20 +12106,21 @@
 
         /* istanbul ignore if */
         if ( config.performance && mark) {
-          // 结束编译的mark
+          // 标记 -结束编译的mark
           mark('compile end');
-
+          // 计算编译的时间
           measure(("vue " + (this._name) + " compile"), 'compile', 'compile end');
         }
       }
     }
-    // 再次调用$mount
+    /**
+     *  3.编译完成-调用$mount挂载
+     */
     return mount.call(this, el, hydrating)
   };
 
   /**
-   * Get outerHTML of elements, taking care
-   * of SVG elements in IE as well.
+   * 获取el组件对应的子组件html
    */
   function getOuterHTML(el) {
     if (el.outerHTML) {

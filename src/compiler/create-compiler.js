@@ -63,6 +63,7 @@ export function createCompilerCreator(baseCompile: Function): Function {
 
       finalOptions.warn = warn
 
+      // 基础编译模板
       const compiled = baseCompile(template.trim(), finalOptions)
       if (process.env.NODE_ENV !== 'production') {
         detectErrors(compiled.ast, warn)

@@ -58,6 +58,11 @@ export function parseHTML (html, options) {
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
   let last, lastTag
+ 
+  /**
+   * 解析方式: 各种正则匹配,具体解析参考(http://erik.eae.net/simplehtmlparser/simplehtmlparser.js)
+   * while循环递归解析html 一层一层的解析，解析完成一层就抽离一层，只要html为null, 解析方式: 各种正则匹配
+   */
   while (html) {
     last = html
     // Make sure we're not in a plaintext content element like script/style

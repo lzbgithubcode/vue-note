@@ -19,6 +19,20 @@ export const createCompiler = createCompilerCreator(function baseCompile(
   options: CompilerOptions
 ): CompiledResult {
   // 1. 解析html代码字符串为ast
+  /**
+   * 
+        格式: attrs:(1) [{…}]
+                attrsList:(1) [{…}]
+                attrsMap:{id: 'app'}
+                children:(7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+                end:147
+                parent:undefined
+                plain:false
+                rawAttrsMap:{id: {…}}
+                start:0
+                tag:'div'
+                type:1
+   */
   const ast = parse(template.trim(), options)
 
   // 2.是否优化代码

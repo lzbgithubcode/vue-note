@@ -57,25 +57,28 @@ let platformMustUseProp
 let platformGetTagNamespace
 let maybeComponent
 
+/**
+ * 自定义AST的元素：描述元素element的js对象
+ */
 export function createASTElement(
   tag: string,
   attrs: Array<ASTAttr>,
   parent: ASTElement | void
 ): ASTElement {
   return {
-    type: 1,
-    tag,
-    attrsList: attrs,
-    attrsMap: makeAttrsMap(attrs),
+    type: 1,   // 节点类型 对应nodeType  1 元素节点  2 属性节点 3 文本节点  
+    tag,       //节点的标识 e.g div/span
+    attrsList: attrs, // 元素的属性数组
+    attrsMap: makeAttrsMap(attrs),  // 元素的属性map
     rawAttrsMap: {},
-    parent,
-    children: []
+    parent,    // 父节点
+    children: []  // 子节点
   }
 }
 
 /**
  * Convert HTML string to AST.
- * 转化HTML 字符串 -> AST
+ * 转化模版字符串 -> AST
  */
 export function parse(
   template: string,
@@ -206,6 +209,7 @@ export function parse(
     }
   }
 
+  //  开始解析html的模版字符串
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
@@ -916,7 +920,10 @@ function parseModifiers(name: string): Object | void {
     return ret
   }
 }
-
+/**
+ * 节点的属性数组 -> map对象
+ * 必须包含name/value
+ */
 function makeAttrsMap(attrs: Array<Object>): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {

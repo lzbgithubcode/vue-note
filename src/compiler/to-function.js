@@ -19,6 +19,8 @@ function createFunction(code, errors) {
 }
 
 export function createCompileToFunctionFn(compile: Function): Function {
+
+  // 创建编译缓存
   const cache = Object.create(null)
 
   return function compileToFunctions(
@@ -48,7 +50,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
       }
     }
 
-    // check cache
+    // 如果环境存在就立即 -> 返回创建编译缓存
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
@@ -116,7 +118,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
         )
       }
     }
-
+    // 设置缓存的结果
     return (cache[key] = res)
   }
 }

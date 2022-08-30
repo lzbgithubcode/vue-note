@@ -35,7 +35,9 @@ Vue.prototype.$mount = function (
   const options = this.$options
   // resolve template/el and convert to render function
   if (!options.render) {
-    // 首先判断 属性模板
+    /**
+     * 1. 获取template 模版字符串，首先获取template -> 如果有没有就获取el上的html
+     */
     let template = options.template
     if (template) {
       if (typeof template === 'string') {
@@ -60,14 +62,21 @@ Vue.prototype.$mount = function (
     } else if (el) {
       template = getOuterHTML(el)
     }
+
+    /**
+     * 如果template存在就往下编译
+     */
     if (template) {
+
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
-        // 开始编译的mark
+        // 标记-创建开始编译的mark时间戳
         mark('compile')
       }
 
-      // 开始编译模板函数 - 或者到render函数
+      /**
+       * 2. 开始通过compileToFunctions编译，返回render一级静态render函数
+       */
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -80,20 +89,21 @@ Vue.prototype.$mount = function (
 
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
-        // 结束编译的mark
+        // 标记 -结束编译的mark
         mark('compile end')
-
+        // 计算编译的时间
         measure(`vue ${this._name} compile`, 'compile', 'compile end')
       }
     }
   }
-  // 再次调用$mount
+  /**
+   *  3.编译完成-调用$mount挂载
+   */
   return mount.call(this, el, hydrating)
 }
 
 /**
- * Get outerHTML of elements, taking care
- * of SVG elements in IE as well.
+ * 获取el组件对应的子组件html
  */
 function getOuterHTML(el: Element): string {
   if (el.outerHTML) {

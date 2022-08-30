@@ -18,13 +18,18 @@ const genStaticKeysCached = cached(genStaticKeys)
  *    create fresh nodes for them on each re-render;
  * 2. Completely skip them in the patching process.
  */
+/**
+ * 优化的目标:  遍历生成的模板AST树检测纯静态的子树(从来不会改变的dom)
+ * 1. 把静态节点变为常量，不需要重新渲染创建新节点
+ * 2. 在patch过程中跳过他们
+ */
 export function optimize (root: ?ASTElement, options: CompilerOptions) {
   if (!root) return
   isStaticKey = genStaticKeysCached(options.staticKeys || '')
   isPlatformReservedTag = options.isReservedTag || no
-  // first pass: mark all non-static nodes.
+  // 标记所有非静态节点
   markStatic(root)
-  // second pass: mark static roots.
+  // 标记静态节点
   markStaticRoots(root, false)
 }
 
@@ -35,6 +40,9 @@ function genStaticKeys (keys: string): Function {
   )
 }
 
+/**
+ * 递归标记静态节点
+ */
 function markStatic (node: ASTNode) {
   node.static = isStatic(node)
   if (node.type === 1) {
@@ -96,12 +104,14 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
     }
   }
 }
-
+/**
+ * 是否是静态节点
+ */
 function isStatic (node: ASTNode): boolean {
-  if (node.type === 2) { // expression
+  if (node.type === 2) { // expression  表达式
     return false
   }
-  if (node.type === 3) { // text
+  if (node.type === 3) { // text  文本节点
     return true
   }
   return !!(node.pre || (
