@@ -35,6 +35,7 @@ import {
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
+    // 如果vnode 节点是 keepAlive， 那么就直接patch， 没有beforeCreate、created、mounted
     if (
       vnode.componentInstance &&
       !vnode.componentInstance._isDestroyed &&
