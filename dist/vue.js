@@ -763,7 +763,9 @@
   }
 
   /*  */
-
+  /**
+   * 虚拟DOM节点属性
+   */
   var VNode = function VNode (
     tag,
     data,
@@ -3135,6 +3137,7 @@
   // inline hooks to be invoked on component VNodes during patch
   var componentVNodeHooks = {
     init: function init (vnode, hydrating) {
+      // 如果vnode 节点是 keepAlive， 那么就直接patch， 没有beforeCreate、created、mounted
       if (
         vnode.componentInstance &&
         !vnode.componentInstance._isDestroyed &&
@@ -3944,6 +3947,7 @@
     var options = vm.$options;
 
     // locate first non-abstract parent
+    // 找到第一个非抽象abstract 父组件的实例, 忽略抽象组件，不会保存组件到抽象树种
     var parent = options.parent;
     if (parent && !options.abstract) {
       while (parent.$options.abstract && parent.$parent) {
@@ -3979,6 +3983,7 @@
       vm._vnode = vnode;
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
+      // Vue.prototype.__patch__ 本质就是调用 core/vdom/patch.js 文件下的createPatchFunction的返回函数path()
       if (!prevVnode) {
         // initial render
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
@@ -5432,9 +5437,11 @@
 
     render: function render () {
       var slot = this.$slots.default;
+      // 第一步：获取keep-alive包裹着的第一个子组件对象及其组件名；
       var vnode = getFirstComponentChild(slot); //找个第一个子组件的Vnode节点
       var componentOptions = vnode && vnode.componentOptions;
       if (componentOptions) {
+        // 第二步：根据设定的黑白名单（如果有）进行条件匹配，决定是否缓存。不匹配，直接返回组件实例（VNode），否则执行第三步
         // check pattern  匹配组件名称name
         var name = getComponentName(componentOptions);
         var ref = this;
@@ -5452,12 +5459,14 @@
         var ref$1 = this;
         var cache = ref$1.cache;
         var keys = ref$1.keys;
+        // 第三步：根据组件ID和tag生成缓存Key，并在缓存对象中查找是否已缓存过该组件实例。如果存在，直接取出缓存值并更新该key在this.keys中的位置（更新key的位置是实现LRU置换策略的关键），否则执行第四步
         //定义组件的key
         var key = vnode.key == null
           // same constructor may get registered as different local components
           // so cid alone is not enough (#3269)
           ? componentOptions.Ctor.cid + (componentOptions.tag ? ("::" + (componentOptions.tag)) : '')
           : vnode.key;
+        // 第四步：在this.cache对象中存储该组件实例并保存key值，之后检查缓存的实例数量是否超过max的设置值，超过则根据LRU置换策略删除最近最久未使用的实例（即是下标为0的那个key）  
         // 如果缓存存在从缓存中获取组件实例
         if (cache[key]) {
           vnode.componentInstance = cache[key].componentInstance;
@@ -5469,7 +5478,7 @@
           this.vnodeToCache = vnode;
           this.keyToCache = key;
         }
-
+        // 第五步：最后并且很重要，将该组件实例的keepAlive属性值设置为true 在渲染阶段以及hooks函数中使用
         vnode.data.keepAlive = true;
       }
       return vnode || (slot && slot[0])
@@ -6047,6 +6056,7 @@
           }
         }
 
+        //  创建真实dom节点
         vnode.elm = vnode.ns
           ? nodeOps.createElementNS(vnode.ns, tag)
           : nodeOps.createElement(tag, vnode);
@@ -6073,9 +6083,12 @@
       }
     }
 
+    // 创建真实的DOM组件
     function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
       var i = vnode.data;
       if (isDef(i)) {
+        //  第一次 加载keep-alive包裹组件的时候 vnodeToCache赋值， componentInstance = undefined  所有不会执行后面的逻辑
+        //  第二次访问的时候 componentInstance 有缓存值，才会被插入到insert到父组件中
         var isReactivated = isDef(vnode.componentInstance) && i.keepAlive;
         if (isDef(i = i.hook) && isDef(i = i.init)) {
           i(vnode, false /* hydrating */);
@@ -6135,6 +6148,7 @@
       insert(parentElm, vnode.elm, refElm);
     }
 
+    // 插入节点
     function insert (parent, elm, ref) {
       if (isDef(parent)) {
         if (isDef(ref)) {
@@ -6267,6 +6281,9 @@
       }
     }
 
+    /**
+     * dom diff 比较
+     */
     function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
       var oldStartIdx = 0;
       var newStartIdx = 0;
@@ -6364,6 +6381,10 @@
       }
     }
 
+    /**
+     * patch 比较 真实节点DOM
+     * @returns 
+     */
     function patchVnode (
       oldVnode,
       vnode,
@@ -6581,7 +6602,7 @@
       } else {
         var isRealElement = isDef(oldVnode.nodeType);
         if (!isRealElement && sameVnode(oldVnode, vnode)) {
-          // patch existing root node
+          // patch existing root node patch 比较节点
           patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly);
         } else {
           if (isRealElement) {
@@ -6615,7 +6636,7 @@
           var oldElm = oldVnode.elm;
           var parentElm = nodeOps.parentNode(oldElm);
 
-          // create new node
+          // 创建真实dom节点
           createElm(
             vnode,
             insertedVnodeQueue,
@@ -6666,6 +6687,7 @@
       }
 
       invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch);
+      // 返回真实的DOM节点
       return vnode.elm
     }
   }

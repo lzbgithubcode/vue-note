@@ -125,9 +125,11 @@ export default {
 
   render () {
     const slot = this.$slots.default
+    // 第一步：获取keep-alive包裹着的第一个子组件对象及其组件名；
     const vnode: VNode = getFirstComponentChild(slot) //找个第一个子组件的Vnode节点
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
+      // 第二步：根据设定的黑白名单（如果有）进行条件匹配，决定是否缓存。不匹配，直接返回组件实例（VNode），否则执行第三步
       // check pattern  匹配组件名称name
       const name: ?string = getComponentName(componentOptions)
       const { include, exclude } = this
@@ -141,12 +143,14 @@ export default {
       }
 
       const { cache, keys } = this
+      // 第三步：根据组件ID和tag生成缓存Key，并在缓存对象中查找是否已缓存过该组件实例。如果存在，直接取出缓存值并更新该key在this.keys中的位置（更新key的位置是实现LRU置换策略的关键），否则执行第四步
       //定义组件的key
       const key: ?string = vnode.key == null
         // same constructor may get registered as different local components
         // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
+      // 第四步：在this.cache对象中存储该组件实例并保存key值，之后检查缓存的实例数量是否超过max的设置值，超过则根据LRU置换策略删除最近最久未使用的实例（即是下标为0的那个key）  
       // 如果缓存存在从缓存中获取组件实例
       if (cache[key]) {
         vnode.componentInstance = cache[key].componentInstance
@@ -158,7 +162,7 @@ export default {
         this.vnodeToCache = vnode
         this.keyToCache = key
       }
-
+      // 第五步：最后并且很重要，将该组件实例的keepAlive属性值设置为true 在渲染阶段以及hooks函数中使用
       vnode.data.keepAlive = true
     }
     return vnode || (slot && slot[0])

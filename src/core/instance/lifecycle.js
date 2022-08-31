@@ -33,7 +33,7 @@ export function initLifecycle(vm: Component) {
   const options = vm.$options
 
   // locate first non-abstract parent
-  // 找到第一个非抽象abstract 父组件的实例
+  // 找到第一个非抽象abstract 父组件的实例, 忽略抽象组件，不会保存组件到抽象树种
   let parent = options.parent
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
@@ -69,6 +69,7 @@ export function lifecycleMixin(Vue: Class<Component>) {
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    // Vue.prototype.__patch__ 本质就是调用 core/vdom/patch.js 文件下的createPatchFunction的返回函数path()
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)

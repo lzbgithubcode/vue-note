@@ -163,6 +163,7 @@ export function createPatchFunction (backend) {
         }
       }
 
+      //  创建真实dom节点
       vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag, vnode)
@@ -211,7 +212,8 @@ export function createPatchFunction (backend) {
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
     if (isDef(i)) {
-      //  
+      //  第一次 加载keep-alive包裹组件的时候 vnodeToCache赋值， componentInstance = undefined  所有不会执行后面的逻辑
+      //  第二次访问的时候 componentInstance 有缓存值，才会被插入到insert到父组件中
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
       if (isDef(i = i.hook) && isDef(i = i.init)) {
         i(vnode, false /* hydrating */)
@@ -271,6 +273,7 @@ export function createPatchFunction (backend) {
     insert(parentElm, vnode.elm, refElm)
   }
 
+  // 插入节点
   function insert (parent, elm, ref) {
     if (isDef(parent)) {
       if (isDef(ref)) {
@@ -403,6 +406,9 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * dom diff 比较
+   */
   function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
     let oldStartIdx = 0
     let newStartIdx = 0
@@ -500,6 +506,10 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * patch 比较 真实节点DOM
+   * @returns 
+   */
   function patchVnode (
     oldVnode,
     vnode,
@@ -715,7 +725,7 @@ export function createPatchFunction (backend) {
     } else {
       const isRealElement = isDef(oldVnode.nodeType)
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
-        // patch existing root node
+        // patch existing root node patch 比较节点
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {
         if (isRealElement) {
@@ -749,7 +759,7 @@ export function createPatchFunction (backend) {
         const oldElm = oldVnode.elm
         const parentElm = nodeOps.parentNode(oldElm)
 
-        // create new node
+        // 创建真实dom节点
         createElm(
           vnode,
           insertedVnodeQueue,
@@ -800,6 +810,7 @@ export function createPatchFunction (backend) {
     }
 
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
+    // 返回真实的DOM节点
     return vnode.elm
   }
 }

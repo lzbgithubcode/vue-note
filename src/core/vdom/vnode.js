@@ -1,7 +1,10 @@
 /* @flow */
-
+/**
+ * 虚拟DOM节点属性
+ */
 export default class VNode {
-  tag: string | void;
+  // 与真实dom对象对应的属性
+  tag: string | void;     // 标签的tag
   data: VNodeData | void;
   children: ?Array<VNode>;
   text: string | void;
@@ -13,12 +16,12 @@ export default class VNode {
   componentInstance: Component | void; // component instance
   parent: VNode | void; // component placeholder node
 
-  // strictly internal
+  // strictly internal (vue自身内部使用)
   raw: boolean; // contains raw HTML? (server only)
-  isStatic: boolean; // hoisted static node
+  isStatic: boolean; // 标记静态节点
   isRootInsert: boolean; // necessary for enter transition check
-  isComment: boolean; // empty comment placeholder?
-  isCloned: boolean; // is a cloned node?
+  isComment: boolean; // empty comment placeholder? // 是否是空对象
+  isCloned: boolean; // 是否是复制的对象
   isOnce: boolean; // is a v-once node?
   asyncFactory: Function | void; // async component factory function
   asyncMeta: Object | void;
