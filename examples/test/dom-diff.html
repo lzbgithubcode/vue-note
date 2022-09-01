@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>dom diff</title>
+  <style >
+      .data-list{
+        display: flex;
+        justify-content: center;
+        margin-bottom: 40px;
+      }
+      .data-list .item{
+        margin-right: 30px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 40px;
+        background-color:antiquewhite;
+        color: black;
+      }
+  </style>
+  <!-- Delete ".min" for console warnings in development -->
+  <script src="../../dist/vue.js"></script>
+</head>
+
+<body>
+  <div id="app">
+       <!-- 我是注释 -->
+     <div class="data-list">
+          <div v-for="item in dataList" :key="item.id" class="item">{{item.value}}</div>
+     </div>
+     <div class="data-list">
+       <button @click="onClickChange">切换数据</button>
+     </div>
+  </div>
+  <script>
+
+    const vue = new Vue({
+      el: "#app",
+      data: {
+         dataList:[],
+      },
+      created() {
+         this.dataList = [
+            {
+              id:"a",
+              value: "A"
+            },
+            {
+              id:"b",
+              value: "B"
+            },
+            {
+              id:"c",
+              value: "C"
+            },
+            {
+              id:"d",
+              value: "D"
+            },
+            {
+              id:"e",
+              value: "E"
+            },
+            {
+              id:"f",
+              value: "F"
+            },
+            {
+              id:"g",
+              value: "G"
+            }
+         ]
+      },
+      methods:{
+        /**
+         *  点击切换数据
+         * */
+         onClickChange(){
+          this.dataList = [
+            {
+              id:"a",
+              value: "A"
+            },
+            {
+              id:"b",
+              value: "B"
+            },
+            {
+              id:"d",
+              value: "D"
+            },
+            
+            {
+              id:"c",
+              value: "C"
+            },
+            {
+              id:"f",
+              value: "F"
+            },
+            {
+              id:"e",
+              value: "E"
+            },
+            
+            {
+              id:"g",
+              value: "G"
+            },
+             
+            {
+              id:"x",
+              value: "X"
+            }
+         ]
+         }
+      }
+    
+    });
+    console.log("打印vue的实例------", vue);
+  </script>
+</body>
+
+</html>

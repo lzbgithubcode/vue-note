@@ -163,6 +163,7 @@ function callActivatedHooks (queue) {
  */
 export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
+  // 批处理, 如果没有增加在队列就增加在处理队列，如果已经增加啦那么不出增加啦
   if (has[id] == null) {
     has[id] = true
     if (!flushing) {
