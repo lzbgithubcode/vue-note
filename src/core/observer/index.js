@@ -205,6 +205,7 @@ export function defineReactive(
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.
+ * 对一个object 增加一个新的属性，如果属性不存在就处罚改变事件
  */
 export function set(target: Array<any> | Object, key: any, val: any): any {
   if (process.env.NODE_ENV !== 'production' &&
@@ -233,6 +234,7 @@ export function set(target: Array<any> | Object, key: any, val: any): any {
     target[key] = val
     return val
   }
+  // 如果target是对象，并且是响应式 就调用defineReactive方法将新属性值添加到target上，defineReactive方会将新属性添加完之后并将其转化成响应式，最后通知依赖更新
   defineReactive(ob.value, key, val)
   ob.dep.notify()
   return val
