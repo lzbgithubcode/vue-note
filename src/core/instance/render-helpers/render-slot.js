@@ -4,6 +4,9 @@ import { extend, warn, isObject } from 'core/util/index'
 
 /**
  * Runtime helper for rendering <slot>
+ * 
+ * * 如果是`普通插槽`，就直接调用函数生成`VNode`
+* 如果是`作用域插槽`,就调用name对应的`函数生成VNode`
  */
 export function renderSlot (
   name: string,
@@ -11,6 +14,7 @@ export function renderSlot (
   props: ?Object,
   bindObject: ?Object
 ): ?Array<VNode> {
+  // 通过name获取scoped函数
   const scopedSlotFn = this.$scopedSlots[name]
   let nodes
   if (scopedSlotFn) {
@@ -22,6 +26,7 @@ export function renderSlot (
       }
       props = extend(extend({}, bindObject), props)
     }
+   // 执行函数返回 VNode
     nodes =
       scopedSlotFn(props) ||
       (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender)

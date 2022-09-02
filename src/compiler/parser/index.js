@@ -450,6 +450,7 @@ export function processElement(
   )
 
   processRef(element)
+  // 处理slot的组件标签
   processSlotContent(element)
   processSlotOutlet(element)
   processComponent(element)
@@ -605,6 +606,9 @@ function processOnce(el) {
 
 // handle content being passed to a component as slot,
 // e.g. <template slot="xxx">, <div slot-scope="xxx">
+/**
+ * 解析<template slot="xxx">, <div slot-scope="xxx"> 的处理
+ */
 function processSlotContent(el) {
   let slotScope
   if (el.tag === 'template') {
@@ -620,6 +624,8 @@ function processSlotContent(el) {
         true
       )
     }
+
+    // 获取属性 scope/slot-scope 并挂载到el中
     el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
   } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
     /* istanbul ignore if */
@@ -632,16 +638,20 @@ function processSlotContent(el) {
         true
       )
     }
+    // 获取属性 scope/slot-scope 并挂载到el中
     el.slotScope = slotScope
   }
 
   // slot="xxx"
   const slotTarget = getBindingAttr(el, 'slot')
   if (slotTarget) {
+    // 取出插槽名称赋值给节点 slotTarget 属性，如果没有则置为 default
     el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
+    // 根据slot值是否使用了v-bind指令绑定来赋予节点slotTargetDynamic属性不同的布尔值
     el.slotTargetDynamic = !!(el.attrsMap[':slot'] || el.attrsMap['v-bind:slot'])
     // preserve slot as an attribute for native shadow DOM compat
     // only for non-scoped slots.
+    // 如果 slot 是普通标签（非template）的属性且不是作用域插槽，则在节点上添加 attrs 对象数组，用于存储 slot 的信息。
     if (el.tag !== 'template' && !el.slotScope) {
       addAttr(el, 'slot', slotTarget, getRawBindingAttr(el, 'slot'))
     }
@@ -739,7 +749,9 @@ function getSlotName(binding) {
     : { name: `"${name}"`, dynamic: false }
 }
 
-// handle <slot/> outlets
+/**
+ * 处理 <slot/>
+ */
 function processSlotOutlet(el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
